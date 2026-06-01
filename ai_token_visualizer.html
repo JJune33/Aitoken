@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Token Visualizer</title>
+  <style>
+    :root {
+      --bg: #e9d8ad;
+      --bg-deep: #c89157;
+      --panel: rgba(255, 244, 213, 0.78);
+      --panel-strong: rgba(255, 248, 225, 0.92);
+      --text: #191713;
+      --muted: #655a48;
+      --line: rgba(88, 75, 52, 0.22);
+      --dark-track: #27241f;
+      --aqua: #35e7dc;
+      --aqua-soft: rgba(53, 231, 220, 0.24);
+      --teal: #1da995;
+      --orange: #ff8a18;
+      --orange-soft: rgba(255, 138, 24, 0.25);
+      --cream: #fff2bd;
+      --shadow: 0 24px 50px rgba(64, 39, 12, 0.22);
+      --glow-aqua: 0 0 18px rgba(53, 231, 220, 0.72), 0 0 34px rgba(53, 231, 220, 0.34);
+      --glow-orange: 0 0 18px rgba(255, 138, 24, 0.7), 0 0 34px rgba(255, 138, 24, 0.3);
+      --radius: 22px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--text);
+      display: grid;
+      place-items: center;
+      padding: 32px;
+      background:
+        linear-gradient(rgba(120, 84, 35, 0.08) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(120, 84, 35, 0.08) 1px, transparent 1px),
+        radial-gradient(circle at 15% 88%, rgba(53, 231, 220, 0.35), transparent 23rem),
+        radial-gradient(circle at 85% 18%, rgba(255, 138, 24, 0.42), transparent 26rem),
+        linear-gradient(135deg, #f7efcc 0%, var(--bg) 46%, var(--bg-deep) 100%);
+      background-size: 28px 28px, 28px 28px, auto, auto, auto;
+    }
+
+    .app {
+      width: min(1140px, 100%);
+      display: grid;
+      gap: 24px;
+    }
+
+    .hero,
+    .card {
+      position: relative;
+      border: 1px solid rgba(255, 239, 180, 0.7);
+      background: var(--panel);
+      box-shadow: var(--shadow), inset 0 1px 0 rgba(255, 255, 255, 0.72);
+      backdrop-filter: blur(18px);
+    }
+
+    .hero {
+      border-radius: 30px;
+      padding: 30px;
+      overflow: hidden;
+    }
+
+    .hero::after,
+    .card::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      pointer-events: none;
+      box-shadow: inset 0 0 0 1px rgba(255, 138, 24, 0.22), inset 0 0 32px rgba(255, 226, 150, 0.32);
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      color: #063d38;
+      background: linear-gradient(180deg, #9dfff6, #25c9b8 70%, #12816f);
+      padding: 9px 15px;
+      border-radius: 999px;
+      font-weight: 900;
+      margin-bottom: 18px;
+      box-shadow: var(--glow-aqua), inset 0 2px 1px rgba(255, 255, 255, 0.55), inset 0 -4px 8px rgba(0, 0, 0, 0.18);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    h1 {
+      margin: 0 0 12px;
+      font-size: clamp(34px, 5vw, 60px);
+      line-height: 0.98;
+      letter-spacing: -0.055em;
+    }
+
+    .intro {
+      margin: 0;
+      max-width: 800px;
+      color: var(--muted);
+      font-size: 18px;
+      line-height: 1.65;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 0.9fr 1.1fr;
+      gap: 24px;
+      align-items: start;
+    }
+
+    .card {
+      border-radius: var(--radius);
+      padding: 24px;
+    }
+
+    .controls {
+      display: grid;
+      gap: 22px;
+    }
+
+    .control-group {
+      display: grid;
+      gap: 12px;
+    }
+
+    label {
+      font-weight: 900;
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      font-size: 15px;
+    }
+
+    label span {
+      color: var(--muted);
+      font-weight: 800;
+    }
+
+    .slider-wrap {
+      position: relative;
+      padding: 15px 16px;
+      border-radius: 999px;
+      background: linear-gradient(180deg, rgba(255, 248, 222, 0.92), rgba(199, 174, 119, 0.82));
+      border: 1px solid rgba(82, 67, 42, 0.2);
+      box-shadow: inset 0 4px 8px rgba(255, 255, 255, 0.7), inset 0 -8px 18px rgba(78, 52, 20, 0.16), 0 10px 25px rgba(65, 43, 17, 0.16);
+    }
+
+    input[type="range"] {
+      appearance: none;
+      width: 100%;
+      height: 18px;
+      border-radius: 999px;
+      outline: none;
+      background: linear-gradient(90deg, var(--aqua) var(--fill, 30%), rgba(46, 42, 35, 0.86) var(--fill, 30%));
+      box-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.28), 0 0 16px rgba(53, 231, 220, 0.45);
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      appearance: none;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      cursor: pointer;
+      border: 2px solid rgba(255, 244, 186, 0.95);
+      background: radial-gradient(circle at 35% 28%, #ffffff 0 7%, #8afff6 20%, #25cbbb 52%, #0e776a 100%);
+      box-shadow: var(--glow-aqua), inset 0 2px 4px rgba(255, 255, 255, 0.7), inset 0 -5px 9px rgba(0, 0, 0, 0.22);
+    }
+
+    input[type="range"]::-moz-range-thumb {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      cursor: pointer;
+      border: 2px solid rgba(255, 244, 186, 0.95);
+      background: radial-gradient(circle at 35% 28%, #ffffff 0 7%, #8afff6 20%, #25cbbb 52%, #0e776a 100%);
+      box-shadow: var(--glow-aqua), inset 0 2px 4px rgba(255, 255, 255, 0.7), inset 0 -5px 9px rgba(0, 0, 0, 0.22);
+    }
+
+    input[type="number"] {
+      width: 100%;
+      padding: 15px 16px;
+      border: 1px solid rgba(255, 174, 55, 0.72);
+      border-radius: 16px;
+      font: inherit;
+      color: var(--text);
+      outline: none;
+      background: linear-gradient(180deg, rgba(255, 251, 232, 0.96), rgba(255, 231, 171, 0.76));
+      box-shadow: inset 0 2px 5px rgba(255, 255, 255, 0.8), 0 0 18px rgba(255, 138, 24, 0.24);
+    }
+
+    input[type="number"]:focus {
+      border-color: #ff981f;
+      box-shadow: 0 0 0 4px rgba(255, 138, 24, 0.16), var(--glow-orange);
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .stat {
+      background: linear-gradient(180deg, rgba(255, 250, 230, 0.92), rgba(238, 205, 144, 0.64));
+      border: 1px solid rgba(94, 78, 48, 0.18);
+      border-radius: 18px;
+      padding: 16px;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8), 0 8px 18px rgba(67, 43, 16, 0.1);
+    }
+
+    .stat strong {
+      display: block;
+      font-size: 30px;
+      letter-spacing: -0.04em;
+    }
+
+    .stat small {
+      color: var(--muted);
+      font-weight: 800;
+    }
+
+    .price {
+      color: #8b3d00;
+      text-shadow: 0 0 15px rgba(255, 138, 24, 0.55);
+    }
+
+    h2 {
+      margin: 0 0 16px;
+      font-size: 28px;
+      letter-spacing: -0.04em;
+    }
+
+    .answer {
+      min-height: 270px;
+      line-height: 1.7;
+      color: #2f2a21;
+      font-size: 16px;
+      background: rgba(255, 250, 230, 0.54);
+      border: 1px solid rgba(96, 78, 43, 0.16);
+      border-radius: 18px;
+      padding: 18px;
+      box-shadow: inset 0 1px 10px rgba(65, 43, 17, 0.08);
+    }
+
+    .answer p {
+      margin: 0 0 14px;
+    }
+
+    .token-map {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+      padding-top: 18px;
+      border-top: 1px solid var(--line);
+      margin-top: 20px;
+    }
+
+    .token {
+      min-width: 19px;
+      height: 19px;
+      border-radius: 7px;
+      background: linear-gradient(180deg, #8ffff6, #23cab9);
+      border: 1px solid rgba(255, 255, 255, 0.52);
+      box-shadow: 0 0 10px rgba(53, 231, 220, 0.42), inset 0 1px 1px rgba(255, 255, 255, 0.65), inset 0 -3px 5px rgba(0, 0, 0, 0.18);
+      transition: transform 0.2s ease, filter 0.2s ease;
+    }
+
+    .token:nth-child(3n) {
+      background: linear-gradient(180deg, #ffe99c, #ffad2f);
+      box-shadow: 0 0 10px rgba(255, 138, 24, 0.44), inset 0 1px 1px rgba(255, 255, 255, 0.6), inset 0 -3px 5px rgba(0, 0, 0, 0.16);
+    }
+
+    .token:nth-child(5n) {
+      background: linear-gradient(180deg, #f7ead0, #b4a07a);
+      box-shadow: 0 0 10px rgba(255, 241, 198, 0.46), inset 0 1px 1px rgba(255, 255, 255, 0.6), inset 0 -3px 5px rgba(0, 0, 0, 0.16);
+    }
+
+    .token:hover {
+      transform: translateY(-3px) scale(1.12);
+      filter: brightness(1.08);
+    }
+
+    .legend {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      color: var(--muted);
+      font-size: 13px;
+      margin-top: 12px;
+    }
+
+    .pill {
+      border: 1px solid rgba(93, 74, 40, 0.18);
+      background: linear-gradient(180deg, rgba(255, 249, 224, 0.95), rgba(239, 202, 138, 0.72));
+      border-radius: 999px;
+      padding: 8px 11px;
+      font-weight: 800;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7);
+    }
+
+    @media (max-width: 860px) {
+      body {
+        padding: 18px;
+      }
+
+      .grid {
+        grid-template-columns: 1fr;
+      }
+
+      .stats {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <section class="hero">
+      <div class="eyebrow">AI tokens made visible</div>
+      <h1>From short answer to token stream</h1>
+      <p class="intro">Move the complexity slider up and watch the dummy answer become longer, richer and more nuanced. The interface estimates tokens, visualizes them as glowing blocks and calculates cost from your own price per million tokens.</p>
+    </section>
+
+    <section class="grid">
+      <aside class="card controls">
+        <div class="control-group">
+          <label for="complexity">Complexity <span id="complexityLabel">3 of 10</span></label>
+          <div class="slider-wrap">
+            <input id="complexity" type="range" min="1" max="10" value="3" />
+          </div>
+        </div>
+
+        <div class="control-group">
+          <label for="price">Price per 1 million tokens <span>EUR</span></label>
+          <input id="price" type="number" min="0" step="0.01" value="2.50" />
+        </div>
+
+        <div class="stats">
+          <div class="stat">
+            <strong id="wordCount">0</strong>
+            <small>words</small>
+          </div>
+          <div class="stat">
+            <strong id="tokenCount">0</strong>
+            <small>estimated tokens</small>
+          </div>
+          <div class="stat">
+            <strong id="charCount">0</strong>
+            <small>characters</small>
+          </div>
+          <div class="stat">
+            <strong class="price" id="cost">€0.000000</strong>
+            <small>estimated cost</small>
+          </div>
+        </div>
+
+        <div class="legend">
+          <span class="pill">Rule of thumb: 1 token ≈ 4 characters</span>
+          <span class="pill">Actual counts vary by model</span>
+        </div>
+      </aside>
+
+      <section class="card">
+        <h2>Dummy answer</h2>
+        <div id="answer" class="answer"></div>
+        <div class="token-map" id="tokenMap" aria-label="Visual token map"></div>
+      </section>
+    </section>
+  </main>
+
+  <script>
+    const complexityInput = document.getElementById("complexity");
+    const priceInput = document.getElementById("price");
+    const complexityLabel = document.getElementById("complexityLabel");
+    const answerEl = document.getElementById("answer");
+    const tokenMap = document.getElementById("tokenMap");
+    const wordCountEl = document.getElementById("wordCount");
+    const tokenCountEl = document.getElementById("tokenCount");
+    const charCountEl = document.getElementById("charCount");
+    const costEl = document.getElementById("cost");
+
+    const paragraphs = [
+      "A token is a small piece of text that an AI model uses to read and generate language. Sometimes it is a whole word, sometimes part of a word, and sometimes only a punctuation mark.",
+      "A short answer needs only a few pieces. It is direct, contains little nuance and therefore uses less computational work. It may feel simple, but every small piece still counts in the background.",
+      "As the answer grows, more sentences, examples and connecting words appear. That makes the number of tokens rise quickly. Not only the meaning counts, but also commas, periods and text patterns can affect the estimate.",
+      "More complex answers often contain structure. Think of an explanation with context, assumptions, next steps and exceptions. Each extra detail requires new text pieces, so the token meter moves further upward.",
+      "In real AI systems, tokens are used for both input and output. A long question combined with a long answer can therefore cost more than you might expect when looking only at the visible response.",
+      "A useful rule of thumb is that one token equals roughly four characters in a lot of English text. The rule is not perfect, but it helps build intuition for size, cost and speed.",
+      "For technical writing, code, tables or formulas, the ratio can change. Some words are split into several tokens. Special symbols and long compound terms can also make the estimate less precise.",
+      "That is why this visualization is intentionally approximate. Its purpose is not to match a specific tokenizer exactly, but to make it visible why longer and more detailed answers use more capacity.",
+      "When you enter a price per million tokens, tiny text differences become financially measurable. A single answer usually costs very little, but across thousands or millions of requests, token aware writing becomes important.",
+      "The core idea is simple: tokens are the calculation and billing units of language models. The more context, explanation, examples and nuance you ask for, the more blocks light up and the higher the estimated cost becomes."
+    ];
+
+    function formatEuro(value) {
+      return new Intl.NumberFormat("en-US", {
+        style: "currency",
+        currency: "EUR",
+        minimumFractionDigits: 6,
+        maximumFractionDigits: 6
+      }).format(value);
+    }
+
+    function estimateTokens(text) {
+      const cleanText = text.replace(/\s+/g, " ").trim();
+      if (!cleanText) return 0;
+      return Math.max(1, Math.ceil(cleanText.length / 4));
+    }
+
+    function updateSliderFill() {
+      const min = Number(complexityInput.min);
+      const max = Number(complexityInput.max);
+      const value = Number(complexityInput.value);
+      const percent = ((value - min) / (max - min)) * 100;
+      complexityInput.style.setProperty("--fill", `${percent}%`);
+    }
+
+    function render() {
+      const complexity = Number(complexityInput.value);
+      const pricePerMillion = Number(priceInput.value) || 0;
+      const selectedParagraphs = paragraphs.slice(0, complexity);
+      const selectedText = selectedParagraphs.map(text => `<p>${text}</p>`).join("");
+      const plainText = selectedParagraphs.join(" ");
+      const chars = plainText.length;
+      const words = plainText.trim().split(/\s+/).filter(Boolean).length;
+      const tokens = estimateTokens(plainText);
+      const cost = tokens * pricePerMillion / 1000000;
+
+      updateSliderFill();
+      complexityLabel.textContent = `${complexity} of 10`;
+      answerEl.innerHTML = selectedText;
+      wordCountEl.textContent = words.toLocaleString("en-US");
+      tokenCountEl.textContent = tokens.toLocaleString("en-US");
+      charCountEl.textContent = chars.toLocaleString("en-US");
+      costEl.textContent = formatEuro(cost);
+
+      tokenMap.innerHTML = "";
+      const visibleTokens = Math.min(tokens, 260);
+      for (let i = 0; i < visibleTokens; i++) {
+        const block = document.createElement("span");
+        block.className = "token";
+        block.title = `Token ${i + 1}`;
+        tokenMap.appendChild(block);
+      }
+
+      if (tokens > visibleTokens) {
+        const more = document.createElement("span");
+        more.className = "pill";
+        more.textContent = `+ ${tokens - visibleTokens} more tokens`;
+        tokenMap.appendChild(more);
+      }
+    }
+
+    complexityInput.addEventListener("input", render);
+    priceInput.addEventListener("input", render);
+    render();
+  </script>
+</body>
+</html>
