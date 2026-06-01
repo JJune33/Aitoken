@@ -3,22 +3,19 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AI Token Visualizer</title>
+  <title>AI Token Cost Visualizer</title>
   <style>
     :root {
       --bg: #e9d8ad;
       --bg-deep: #c89157;
       --panel: rgba(255, 244, 213, 0.78);
-      --panel-strong: rgba(255, 248, 225, 0.92);
       --text: #191713;
       --muted: #655a48;
       --line: rgba(88, 75, 52, 0.22);
       --dark-track: #27241f;
       --aqua: #35e7dc;
-      --aqua-soft: rgba(53, 231, 220, 0.24);
       --teal: #1da995;
       --orange: #ff8a18;
-      --orange-soft: rgba(255, 138, 24, 0.25);
       --cream: #fff2bd;
       --shadow: 0 24px 50px rgba(64, 39, 12, 0.22);
       --glow-aqua: 0 0 18px rgba(53, 231, 220, 0.72), 0 0 34px rgba(53, 231, 220, 0.34);
@@ -48,7 +45,7 @@
     }
 
     .app {
-      width: min(1140px, 100%);
+      width: min(1180px, 100%);
       display: grid;
       gap: 24px;
     }
@@ -103,7 +100,7 @@
 
     .intro {
       margin: 0;
-      max-width: 800px;
+      max-width: 850px;
       color: var(--muted);
       font-size: 18px;
       line-height: 1.65;
@@ -111,7 +108,7 @@
 
     .grid {
       display: grid;
-      grid-template-columns: 0.9fr 1.1fr;
+      grid-template-columns: 0.92fr 1.08fr;
       gap: 24px;
       align-items: start;
     }
@@ -184,7 +181,7 @@
       box-shadow: var(--glow-aqua), inset 0 2px 4px rgba(255, 255, 255, 0.7), inset 0 -5px 9px rgba(0, 0, 0, 0.22);
     }
 
-    input[type="number"] {
+    input[type="number"], textarea {
       width: 100%;
       padding: 15px 16px;
       border: 1px solid rgba(255, 174, 55, 0.72);
@@ -196,9 +193,22 @@
       box-shadow: inset 0 2px 5px rgba(255, 255, 255, 0.8), 0 0 18px rgba(255, 138, 24, 0.24);
     }
 
-    input[type="number"]:focus {
+    textarea {
+      min-height: 112px;
+      resize: vertical;
+      line-height: 1.5;
+    }
+
+    input[type="number"]:focus,
+    textarea:focus {
       border-color: #ff981f;
       box-shadow: 0 0 0 4px rgba(255, 138, 24, 0.16), var(--glow-orange);
+    }
+
+    .price-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
     }
 
     .stats {
@@ -217,7 +227,7 @@
 
     .stat strong {
       display: block;
-      font-size: 30px;
+      font-size: 29px;
       letter-spacing: -0.04em;
     }
 
@@ -253,38 +263,53 @@
       margin: 0 0 14px;
     }
 
+    .token-section-title {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: 20px;
+      padding-top: 18px;
+      border-top: 1px solid var(--line);
+      font-weight: 900;
+    }
+
+    .token-section-title span {
+      color: var(--muted);
+      font-weight: 800;
+    }
+
     .token-map {
       display: flex;
       flex-wrap: wrap;
       gap: 7px;
-      padding-top: 18px;
-      border-top: 1px solid var(--line);
-      margin-top: 20px;
+      margin-top: 12px;
     }
 
     .token {
       min-width: 19px;
       height: 19px;
       border-radius: 7px;
-      background: linear-gradient(180deg, #8ffff6, #23cab9);
       border: 1px solid rgba(255, 255, 255, 0.52);
-      box-shadow: 0 0 10px rgba(53, 231, 220, 0.42), inset 0 1px 1px rgba(255, 255, 255, 0.65), inset 0 -3px 5px rgba(0, 0, 0, 0.18);
       transition: transform 0.2s ease, filter 0.2s ease;
     }
 
-    .token:nth-child(3n) {
+    .token.input {
       background: linear-gradient(180deg, #ffe99c, #ffad2f);
       box-shadow: 0 0 10px rgba(255, 138, 24, 0.44), inset 0 1px 1px rgba(255, 255, 255, 0.6), inset 0 -3px 5px rgba(0, 0, 0, 0.16);
     }
 
+    .token.output {
+      background: linear-gradient(180deg, #8ffff6, #23cab9);
+      box-shadow: 0 0 10px rgba(53, 231, 220, 0.42), inset 0 1px 1px rgba(255, 255, 255, 0.65), inset 0 -3px 5px rgba(0, 0, 0, 0.18);
+    }
+
     .token:nth-child(5n) {
-      background: linear-gradient(180deg, #f7ead0, #b4a07a);
-      box-shadow: 0 0 10px rgba(255, 241, 198, 0.46), inset 0 1px 1px rgba(255, 255, 255, 0.6), inset 0 -3px 5px rgba(0, 0, 0, 0.16);
+      filter: saturate(0.78) brightness(1.06);
     }
 
     .token:hover {
       transform: translateY(-3px) scale(1.12);
-      filter: brightness(1.08);
+      filter: brightness(1.1);
     }
 
     .legend {
@@ -305,7 +330,7 @@
       box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7);
     }
 
-    @media (max-width: 860px) {
+    @media (max-width: 900px) {
       body {
         padding: 18px;
       }
@@ -314,7 +339,8 @@
         grid-template-columns: 1fr;
       }
 
-      .stats {
+      .stats,
+      .price-grid {
         grid-template-columns: 1fr;
       }
     }
@@ -324,40 +350,52 @@
   <main class="app">
     <section class="hero">
       <div class="eyebrow">AI tokens made visible</div>
-      <h1>From short answer to token stream</h1>
-      <p class="intro">Move the complexity slider up and watch the dummy answer become longer, richer and more nuanced. The interface estimates tokens, visualizes them as glowing blocks and calculates cost from your own price per million tokens.</p>
+      <h1>Input tokens + output tokens = total cost</h1>
+      <p class="intro">Type a prompt, move the complexity slider and see how an AI request is split into input tokens and output tokens. Providers often charge different rates for reading your prompt and generating the answer.</p>
     </section>
 
     <section class="grid">
       <aside class="card controls">
         <div class="control-group">
-          <label for="complexity">Complexity <span id="complexityLabel">3 of 10</span></label>
+          <label for="prompt">Input prompt <span>what the model reads</span></label>
+          <textarea id="prompt">Explain what AI tokens are in a simple and visual way.</textarea>
+        </div>
+
+        <div class="control-group">
+          <label for="complexity">Output complexity <span id="complexityLabel">3 of 10</span></label>
           <div class="slider-wrap">
             <input id="complexity" type="range" min="1" max="10" value="3" />
           </div>
         </div>
 
         <div class="control-group">
-          <label for="price">Price per 1 million tokens <span>EUR</span></label>
-          <input id="price" type="number" min="0" step="0.01" value="2.50" />
+          <label>Price per 1 million tokens <span>EUR</span></label>
+          <div class="price-grid">
+            <input id="inputPrice" type="number" min="0" step="0.01" value="2.50" aria-label="Input price per 1 million tokens" />
+            <input id="outputPrice" type="number" min="0" step="0.01" value="10.00" aria-label="Output price per 1 million tokens" />
+          </div>
+          <div class="legend">
+            <span class="pill">Left: input price</span>
+            <span class="pill">Right: output price</span>
+          </div>
         </div>
 
         <div class="stats">
           <div class="stat">
-            <strong id="wordCount">0</strong>
-            <small>words</small>
+            <strong id="inputTokens">0</strong>
+            <small>input tokens</small>
           </div>
           <div class="stat">
-            <strong id="tokenCount">0</strong>
-            <small>estimated tokens</small>
+            <strong id="outputTokens">0</strong>
+            <small>output tokens</small>
           </div>
           <div class="stat">
-            <strong id="charCount">0</strong>
-            <small>characters</small>
+            <strong id="totalTokens">0</strong>
+            <small>total tokens</small>
           </div>
           <div class="stat">
-            <strong class="price" id="cost">€0.000000</strong>
-            <small>estimated cost</small>
+            <strong class="price" id="totalCost">€0.000000</strong>
+            <small>estimated total cost</small>
           </div>
         </div>
 
@@ -368,23 +406,33 @@
       </aside>
 
       <section class="card">
-        <h2>Dummy answer</h2>
+        <h2>Dummy output</h2>
         <div id="answer" class="answer"></div>
-        <div class="token-map" id="tokenMap" aria-label="Visual token map"></div>
+
+        <div class="token-section-title">Input token map <span id="inputTokenLabel">0 tokens</span></div>
+        <div class="token-map" id="inputTokenMap" aria-label="Visual input token map"></div>
+
+        <div class="token-section-title">Output token map <span id="outputTokenLabel">0 tokens</span></div>
+        <div class="token-map" id="outputTokenMap" aria-label="Visual output token map"></div>
       </section>
     </section>
   </main>
 
   <script>
+    const promptInput = document.getElementById("prompt");
     const complexityInput = document.getElementById("complexity");
-    const priceInput = document.getElementById("price");
+    const inputPriceEl = document.getElementById("inputPrice");
+    const outputPriceEl = document.getElementById("outputPrice");
     const complexityLabel = document.getElementById("complexityLabel");
     const answerEl = document.getElementById("answer");
-    const tokenMap = document.getElementById("tokenMap");
-    const wordCountEl = document.getElementById("wordCount");
-    const tokenCountEl = document.getElementById("tokenCount");
-    const charCountEl = document.getElementById("charCount");
-    const costEl = document.getElementById("cost");
+    const inputTokenMap = document.getElementById("inputTokenMap");
+    const outputTokenMap = document.getElementById("outputTokenMap");
+    const inputTokenLabel = document.getElementById("inputTokenLabel");
+    const outputTokenLabel = document.getElementById("outputTokenLabel");
+    const inputTokensEl = document.getElementById("inputTokens");
+    const outputTokensEl = document.getElementById("outputTokens");
+    const totalTokensEl = document.getElementById("totalTokens");
+    const totalCostEl = document.getElementById("totalCost");
 
     const paragraphs = [
       "A token is a small piece of text that an AI model uses to read and generate language. Sometimes it is a whole word, sometimes part of a word, and sometimes only a punctuation mark.",
@@ -422,44 +470,58 @@
       complexityInput.style.setProperty("--fill", `${percent}%`);
     }
 
+    function renderTokenMap(container, amount, type) {
+      container.innerHTML = "";
+      const visibleTokens = Math.min(amount, 180);
+      for (let i = 0; i < visibleTokens; i++) {
+        const block = document.createElement("span");
+        block.className = `token ${type}`;
+        block.title = `${type === "input" ? "Input" : "Output"} token ${i + 1}`;
+        container.appendChild(block);
+      }
+
+      if (amount > visibleTokens) {
+        const more = document.createElement("span");
+        more.className = "pill";
+        more.textContent = `+ ${amount - visibleTokens} more`;
+        container.appendChild(more);
+      }
+    }
+
     function render() {
       const complexity = Number(complexityInput.value);
-      const pricePerMillion = Number(priceInput.value) || 0;
+      const inputPricePerMillion = Number(inputPriceEl.value) || 0;
+      const outputPricePerMillion = Number(outputPriceEl.value) || 0;
       const selectedParagraphs = paragraphs.slice(0, complexity);
       const selectedText = selectedParagraphs.map(text => `<p>${text}</p>`).join("");
-      const plainText = selectedParagraphs.join(" ");
-      const chars = plainText.length;
-      const words = plainText.trim().split(/\s+/).filter(Boolean).length;
-      const tokens = estimateTokens(plainText);
-      const cost = tokens * pricePerMillion / 1000000;
+      const plainOutput = selectedParagraphs.join(" ");
+      const plainInput = promptInput.value;
+
+      const inputTokens = estimateTokens(plainInput);
+      const outputTokens = estimateTokens(plainOutput);
+      const totalTokens = inputTokens + outputTokens;
+      const inputCost = inputTokens * inputPricePerMillion / 1000000;
+      const outputCost = outputTokens * outputPricePerMillion / 1000000;
+      const totalCost = inputCost + outputCost;
 
       updateSliderFill();
       complexityLabel.textContent = `${complexity} of 10`;
       answerEl.innerHTML = selectedText;
-      wordCountEl.textContent = words.toLocaleString("en-US");
-      tokenCountEl.textContent = tokens.toLocaleString("en-US");
-      charCountEl.textContent = chars.toLocaleString("en-US");
-      costEl.textContent = formatEuro(cost);
+      inputTokensEl.textContent = inputTokens.toLocaleString("en-US");
+      outputTokensEl.textContent = outputTokens.toLocaleString("en-US");
+      totalTokensEl.textContent = totalTokens.toLocaleString("en-US");
+      totalCostEl.textContent = formatEuro(totalCost);
+      inputTokenLabel.textContent = `${inputTokens.toLocaleString("en-US")} tokens`;
+      outputTokenLabel.textContent = `${outputTokens.toLocaleString("en-US")} tokens`;
 
-      tokenMap.innerHTML = "";
-      const visibleTokens = Math.min(tokens, 260);
-      for (let i = 0; i < visibleTokens; i++) {
-        const block = document.createElement("span");
-        block.className = "token";
-        block.title = `Token ${i + 1}`;
-        tokenMap.appendChild(block);
-      }
-
-      if (tokens > visibleTokens) {
-        const more = document.createElement("span");
-        more.className = "pill";
-        more.textContent = `+ ${tokens - visibleTokens} more tokens`;
-        tokenMap.appendChild(more);
-      }
+      renderTokenMap(inputTokenMap, inputTokens, "input");
+      renderTokenMap(outputTokenMap, outputTokens, "output");
     }
 
+    promptInput.addEventListener("input", render);
     complexityInput.addEventListener("input", render);
-    priceInput.addEventListener("input", render);
+    inputPriceEl.addEventListener("input", render);
+    outputPriceEl.addEventListener("input", render);
     render();
   </script>
 </body>
